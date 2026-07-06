@@ -46,7 +46,7 @@ Dézippe le projet quelque part, par exemple `C:\Users\TonNom\shazam_proto`, pui
 ```powershell
 git clone https://github.com/LeStudio3D/shazam-local.git
 
-cd shazam_local
+cd shazam-local
 
 # créer un environnement virtuel
 python -m venv venv
