@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion — Shazam Local</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="login-wrap">
+  <form class="login-box" method="POST" action="{{ url_for('login_page') }}">
+    <h1>🎵 Shazam Local</h1>
+    {% if error %}<div class="login-error">{{ error }}</div>{% endif %}
+    <label>
+      Nom d'utilisateur
+      <input type="text" name="username" autofocus required>
+    </label>
+    <label>
+      Mot de passe
+      <input type="password" name="password" required>
+    </label>
+    <button type="submit" class="primary-btn">Se connecter</button>
+  </form>
+</div>
+</body>
+</html>

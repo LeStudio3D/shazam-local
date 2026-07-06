@@ -1,0 +1,19 @@
+# Données personnelles et générées (jamais commit)
+db/
+backups/
+config.json
+songs/*
+!songs/PLACE_TES_MP3_ICI.txt
+training/*
+!training/PLACE_TES_ECHANTILLONS_ICI.txt
+
+# Environnement Python
+venv/
+__pycache__/
+*.pyc
+
+# Éditeurs / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

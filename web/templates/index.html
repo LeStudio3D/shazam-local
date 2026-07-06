@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shazam Local</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body data-role="{{ role }}" data-username="{{ username }}">
+<div class="app">
+  <header>
+    <h1>🎵 Shazam Local</h1>
+    <div class="header-right">
+      <div id="status" class="status">chargement...</div>
+      <span class="user-badge">{{ username }} {% if role == 'admin' %}· admin{% endif %}</span>
+      <a href="{{ url_for('logout') }}" class="small-btn">Déconnexion</a>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="identify">Identifier</button>
+    <button class="tab-btn" data-tab="settings">Réglages</button>
+    {% if role == 'admin' %}
+    <button class="tab-btn" data-tab="training">Entraînement</button>
+    <button class="tab-btn" data-tab="users">Comptes</button>
+    <button class="tab-btn" data-tab="admin-settings">Réglages avancés</button>
+    <button class="tab-btn" data-tab="logs">Logs</button>
+    {% endif %}
+  </nav>
+
+  <section id="tab-identify" class="tab-content active">
+    <div class="record-panel">
+      <button id="recordBtn" class="record-btn">🎤 Enregistrer (10s)</button>
+      <div id="recordStatus" class="record-status"></div>
+    </div>
+    <div id="results" class="results"></div>
+  </section>
+
+  <section id="tab-settings" class="tab-content">
+    <h2>Mon seuil de confiance</h2>
+    <p class="note">C'est le nombre minimum de hash alignés pour qu'un résultat te soit proposé.
+      Plus bas = plus de résultats mais plus de faux positifs possibles.</p>
+    <form id="userSettingsForm" class="settings-form">
+      <label>
+        Seuil de confiance minimal
+        <input type="number" id="user_min_confidence" step="1" min="1">
+      </label>
+      <button type="submit" class="primary-btn">Sauvegarder</button>
+    </form>
+
+    <hr>
+
+    <h2>Calibration automatique de mon seuil</h2>
+    <p class="note">Utilise tes propres recherches déjà confirmées pour trouver automatiquement le
+      meilleur seuil pour toi (ton micro, ton environnement). Il faut au moins 3 recherches confirmées.</p>
+    <button id="userCalibrateBtn" class="primary-btn">Calibrer automatiquement mon seuil</button>
+    <div id="userCalibrateStatus" class="record-status"></div>
+
+    <hr>
+
+    <h2>Changer mon mot de passe</h2>
+    <form id="changePasswordForm" class="settings-form">
+      <label>
+        Mot de passe actuel
+        <input type="password" id="current_password" required>
+      </label>
+      <label>
+        Nouveau mot de passe
+        <input type="password" id="new_password_self" required minlength="4">
+      </label>
+      <button type="submit" class="primary-btn">Changer le mot de passe</button>
+    </form>
+    <div id="changePasswordStatus" class="record-status"></div>
+  </section>
+
+  {% if role == 'admin' %}
+  <section id="tab-training" class="tab-content">
+    <h2>Revue des échantillons d'entraînement</h2>
+    <p class="note">Dépose des extraits de ~10s dans le dossier <code>training/</code> (sous-dossiers acceptés).
+      Ils sont proposés ici un par un, à confirmer ou corriger.</p>
+    <div id="trainingStatus" class="record-status"></div>
+    <div id="trainingCard"></div>
+  </section>
+
+  <section id="tab-users" class="tab-content">
+    <h2>Comptes utilisateurs</h2>
+    <div id="usersList" class="users-list"></div>
+
+    <hr>
+
+    <h2>Créer un compte</h2>
+    <form id="createUserForm" class="settings-form">
+      <label>
+        Nom d'utilisateur
+        <input type="text" id="new_username" required>
+      </label>
+      <label>
+        Mot de passe
+        <input type="password" id="new_password" required>
+      </label>
+      <label>
+        Rôle
+        <select id="new_role">
+          <option value="user">Utilisateur</option>
+          <option value="admin">Administrateur</option>
+        </select>
+      </label>
+      <button type="submit" class="primary-btn">Créer le compte</button>
+    </form>
+    <div id="createUserStatus" class="record-status"></div>
+  </section>
+
+  <section id="tab-admin-settings" class="tab-content">
+    <h2>Paramètres d'indexation (globaux, tous utilisateurs)</h2>
+    <form id="settingsForm" class="settings-form">
+      <label>
+        Seuil d'amplitude minimal (dB)
+        <input type="number" id="amp_min_db" step="1">
+      </label>
+      <label>
+        Voisinage temps (bins)
+        <input type="number" id="neighborhood_t" step="1" min="1">
+      </label>
+      <label>
+        Voisinage fréquence (bins)
+        <input type="number" id="neighborhood_f" step="1" min="1">
+      </label>
+      <label>
+        Fan-out (pics cibles par ancre)
+        <input type="number" id="fan_out" step="1" min="1">
+      </label>
+      <label>
+        Fenêtre temporelle (bins)
+        <input type="number" id="time_window" step="1" min="1">
+      </label>
+      <button type="submit" class="primary-btn">Sauvegarder les réglages</button>
+    </form>
+    <p class="note">Après un changement : redémarre <code>webapp.py</code> puis lance
+      <code>python main.py index songs --rebuild</code> dans un terminal.</p>
+
+    <hr>
+
+    <h2>Calibration automatique (admin)</h2>
+    <p>Teste plusieurs réglages sur ta bibliothèque à partir de toutes les corrections confirmées
+      (tous utilisateurs), et garde le meilleur.</p>
+    <button id="calibrateBtn" class="primary-btn">Lancer la calibration</button>
+    <div id="calibrateStatus" class="record-status"></div>
+  </section>
+
+  <section id="tab-logs" class="tab-content">
+    <div class="logs-header">
+      <span>Logs en temps réel</span>
+      <button id="clearLogsBtn" class="small-btn">Effacer l'affichage</button>
+    </div>
+    <div id="logsView" class="logs-view"></div>
+  </section>
+  {% endif %}
+</div>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
